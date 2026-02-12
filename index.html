@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>ZETA-CORP | Secure Terminal</title>
+    <style>
+        body { background: #050a0f; color: #00ff41; font-family: 'Courier New', monospace; text-align: center; padding-top: 50px; }
+        .terminal::after { content: "admin"; position: absolute; left: -9999px; top: -9999px; width: 0; height: 0; overflow: hidden; display: block;}
+        input { background: #000; border: 1px solid #333; color: #00ff41; padding: 12px; margin: 10px; width: 250px; font-size: 16px; outline: none; }
+        input:focus { border-color: #00ff41; }
+        button { background: #00ff41; color: #000; border: none; padding: 12px 25px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        button:disabled { background: #222; color: #555; cursor: not-allowed; }
+        #status-msg { margin-top: 20px; font-weight: bold; min-height: 20px; text-transform: uppercase; }
+        .attempts { color: #ff4141; margin-bottom: 10px; font-size: 14px; }
+        .hint { font-size: 5px; color: #1a3a55; margin-top: 100px; user-select: none; }
+        .secret-code { color: #fff; background: #222; padding: 5px; border: 1px dashed #fff; margin-top: 10px; display: inline-block; }
+    </style>
+</head>
+
+<body>
+    <div class="terminal">
+        <h2>CORE SYSTEM ACCESS</h2>
+        <div class="attempts" id="attempts-count">ОСТАЛОСЬ ПОПЫТОК: 20</div>
+        
+        <div id="input-fields">
+            <input type="text" id="login" placeholder="LOGIN" maxlength="6">
+            <br>
+            <input type="text" id="pass" placeholder="PASSWORD" maxlength="8">
+            <br>
+            <button id="dept_7" onclick="handleLogin()">ВЫПОЛНИТЬ ВХОД</button>
+        </div>
+        
+        <div id="status-msg">WAITING...</div>
+    </div>
+
+    <div class="hint">--- .-. -..</div>
+
+    <script>
+        if (localStorage.getItem('attemptsLeft') === null) {
+            localStorage.setItem('attemptsLeft', 20);
+        }
+
+        let attemptsLeft = parseInt(localStorage.getItem('attemptsLeft'));
+        const attDisplay = document.getElementById('attempts-count');
+        const msg = document.getElementById('status-msg');
+        const inputArea = document.getElementById('input-fields');
+        const formLink = "https://docs.google.com/forms/d/e/1FAIpQLSfNpeqvz4pdOFfftbJy1tF-L_rjR97WxBzKbz0h1yGsBLm1hw/viewform?usp=publish-editor";
+
+        updateDisplay();
+
+        function updateDisplay() {
+            attDisplay.innerText = "ОСТАЛОСЬ ПОПЫТОК: " + attemptsLeft;
+            if (attemptsLeft <= 0) lockSystem();
+        }
+
+        function generateCode(type) {
+            if (type === 'win') {
+                return (Math.pow(10, 2) * 7 + 77);
+            } else {
+                return (Math.sqrt(443556));
+            }
+        }
+
+        function lockSystem() {
+            inputArea.style.display = "none";
+            msg.style.color = "#ff4141";
+            const failCode = generateCode('fail');
+            msg.innerHTML = "СИСТЕМА ЗАБЛОКИРОВАНА.<br>ВАШ КОД: <div class='secret-code'>" + failCode + "</div><br><br>" + 
+                           "<a href='" + formLink + "' target='_blank' style='color:orange;'>ПЕРЕЙТИ К ОТЧЕТУ</a>";
+        }
+
+        function handleLogin() {
+            const l = document.getElementById('login').value;
+            const p = document.getElementById('pass').value;
+
+            if (btoa(l) === "YWRtaW43" && btoa(p) === "cDRzc3cwcmQ=") {
+                inputArea.style.display = "none";
+                msg.style.color = "#fff";
+                const winCode = generateCode('win');
+                msg.innerHTML = "ВЗЛОМ УСПЕШЕН!<br>ВАШ КОД: <div class='secret-code'>" + winCode + "</div><br><br>" + 
+                               "<a href='" + formLink + "' target='_blank' style='color:#00ff41; font-size: 20px;'>ЗАРЕГИСТРИРОВАТЬ УСПЕХ</a>";
+                attDisplay.style.visibility = "hidden";
+            } else {
+                attemptsLeft--;
+                localStorage.setItem('attemptsLeft', attemptsLeft);
+                updateDisplay();
+                if (attemptsLeft > 0) {
+                    msg.style.color = "#ff4141";
+                    msg.innerText = "AUTH_ERROR: ACCESS DENIED";
+                }
+            }
+        }
+        console.log("SYS_INFO: Password_prefix = 'p4ssw'");
+    </script>
+</body>
+</html>
